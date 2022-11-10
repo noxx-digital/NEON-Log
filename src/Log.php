@@ -22,49 +22,62 @@ class Log
     private const TYPE_NEEDLE = "%%type%%";
     private const MSG_NEEDLE = "%%msg%%";
 
-    private const DEFAULT_DATE_FORMAT = 'Y-m-d H:i:s (T)';
-    private const DEFAULT_LOG_FORMAT = '%%date%% [%%type%%] - %%msg%%';
+    private string $date_format = 'Y-m-d H:i:s (T)';
+    private string $log_format = '%%date%% [%%type%%] - %%msg%%';
 
-    private array $custom_log_types;
+    /**
+     * @param string $date_format
+     */
+    public function set_date_format( string $date_format ): void
+    {
+        $this->date_format = $date_format;
+    }
+
+    /**
+     * @param string $log_format
+     */
+    public function set_log_format( string $log_format ): void
+    {
+        $this->log_format = $log_format;
+    }
 
     /**
      * @param string $log_path
      */
     public function __construct(
-        string $log_path = '/tmp/neon.log',
+        string $log_path='/var/log/neon/neon.log',
     )
     {
-        $this->log_path             = $log_path;
-        $this->custom_log_types     = [];
+        $this->log_path = $log_path;
 
         if ( !is_dir( dirname( $this->log_path )))
             mkdir( dirname( $this->log_path ), 0700, TRUE );
     }
 
     /**
-     * @param LogType $type
+     * @param string $log_type
      * @param string $msg
      *
      * @return string
      */
-    private function construct_msg( LogType $type, string $msg ): string
+    private function construct_log( string $log_type, string $msg ): string
     {
-        $log_string = str_replace( self::DATE_NEEDLE, date( self::DEFAULT_DATE_FORMAT ), self::DEFAULT_LOG_FORMAT );
-        $log_string .= str_replace( self::TYPE_NEEDLE, $type, $log_string );
-        $log_string .= str_replace( self::MSG_NEEDLE, $msg, $log_string );
-        return $log_string;
+        $log = str_replace( self::DATE_NEEDLE, date( $this->date_format ), $this->log_format );
+        $log .= str_replace( self::TYPE_NEEDLE, $log_type, $log );
+        $log .= str_replace( self::MSG_NEEDLE, $msg, $log );
+        return $log;
     }
 
     /**
-     * @param LogType $log_type
+     * @param string $log_type
      * @param string $msg
      *
      * @return string
      */
-    private function log_internal( LogType $log_type, string $msg ): string
+    private function log_internal( string $log_type, string $msg ): string
     {
         $msg = str_replace( "\n", "", $msg );
-        $log_msg = $this->construct_msg( $log_type, $msg );
+        $log_msg = $this->construct_log( $log_type, $msg );
 
         file_put_contents( $this->log_path, $log_msg . "\n", FILE_APPEND );
         return $log_msg;
@@ -77,7 +90,7 @@ class Log
      */
     public function fatal( string $msg ): string
     {
-        return $this->log_internal( LogType::FATAL, $msg );
+        return $this->log_internal( (string)LogType::FATAL, $msg );
     }
 
     /**
@@ -87,7 +100,7 @@ class Log
      */
     public function error( string $msg ): string
     {
-        return $this->log_internal( LogType::ERROR, $msg );
+        return $this->log_internal( (string)LogType::ERROR, $msg );
     }
 
     /**
@@ -97,7 +110,7 @@ class Log
      */
     public function warn( string $msg ): string
     {
-        return $this->log_internal( LogType::WARN, $msg, $print );
+        return $this->log_internal( (string)LogType::WARN, $msg );
     }
 
     /**
@@ -107,7 +120,7 @@ class Log
      */
     public function info( string $msg ): string
     {
-        return $this->log_internal( LogType::INFO, $msg, $print );
+        return $this->log_internal( (string)LogType::INFO, $msg );
     }
 
     /**
@@ -117,7 +130,7 @@ class Log
      */
     public function debug( string $msg ): string
     {
-        return $this->log_internal( LogType::DEBUG, $msg, $print );
+        return $this->log_internal( (string)LogType::DEBUG, $msg );
     }
 
     /**
@@ -127,6 +140,6 @@ class Log
      */
     public function trace( string $msg ): string
     {
-        return $this->log_internal( LogType::TRACE, $msg, $print );
+        return $this->log_internal( (string)LogType::TRACE, $msg );
     }
 }
