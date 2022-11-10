@@ -1,6 +1,6 @@
 <?php
 
-namespace Neon;
+namespace Neon\Util;
 
 enum LogType: string
 {

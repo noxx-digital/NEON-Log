@@ -12,7 +12,7 @@
  *
  */
 
-namespace Neon;
+namespace Neon\Util;
 
 class Log
 {
